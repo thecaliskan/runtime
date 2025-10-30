@@ -73,9 +73,9 @@ class SymfonyHttpBridgeTest extends TestCase
 
         $response = $this->createMock(Response::class);
         $expectedHeaders = [
-            ['x-test', 'Swoole-Runtime'],
-            ['set-cookie', $fooCookie],
-            ['set-cookie', $barCookie],
+            1 => ['x-test', 'Swoole-Runtime'],
+            2 => ['set-cookie', $fooCookie],
+            3 => ['set-cookie', $barCookie],
         ];
         $response->expects(self::exactly(3))->method('header')->willReturnCallback(function ($key, $value) use ($expectedHeaders) {
             $this->assertEquals([$key, $value], array_shift($expectedHeaders));
@@ -100,9 +100,9 @@ class SymfonyHttpBridgeTest extends TestCase
 
         $response = $this->createMock(Response::class);
         $expectedWrites = [
-            "Foo\n",
-            "Bar\n",
-            '',
+            1 => "Foo\n",
+            2 => "Bar\n",
+            3 => '',
         ];
         $response->expects(self::exactly(3))->method('write')->willReturnCallback(function ($string) use ($expectedWrites) {
             $this->assertSame(array_shift($expectedWrites), $string);
