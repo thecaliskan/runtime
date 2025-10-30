@@ -22,6 +22,7 @@ class LambdaClientTest extends TestCase
     protected function setUp(): void
     {
         ob_start();
+        sleep(5);
         Server::start();
         $this->lambda = new LambdaClient('localhost:8126', 'phpunit');
     }
