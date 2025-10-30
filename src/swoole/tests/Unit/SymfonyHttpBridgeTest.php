@@ -72,10 +72,13 @@ class SymfonyHttpBridgeTest extends TestCase
         $sfResponse->expects(self::once())->method('getContent')->willReturn('Test');
 
         $response = $this->createMock(Response::class);
-        $response->expects(self::exactly(3))->method('header')->withConsecutive(
+        $expectedHeaders = [
             ['x-test', 'Swoole-Runtime'],
             ['set-cookie', $fooCookie],
-            ['set-cookie', $barCookie]
+            ['set-cookie', $barCookie],
+        ];
+        $response->expects(self::exactly(3))->method('header')->willReturnCallback(
+            fn($key, $value) => $this->assertEquals([$key, $value], array_shift($expectedHeaders))
         );
         $response->expects(self::once())->method('status')->with(201);
         $response->expects(self::once())->method('end')->with('Test');
@@ -94,7 +97,14 @@ class SymfonyHttpBridgeTest extends TestCase
         });
 
         $response = $this->createMock(Response::class);
-        $response->expects(self::exactly(3))->method('write')->withConsecutive(["Foo\n"], ["Bar\n"], ['']);
+        $expectedWrites = [
+            "Foo\n",
+            "Bar\n",
+            ''
+        ];
+        $response->expects(self::exactly(3))->method('write')->willReturnCallback(
+            fn($string) => $this->assertSame(array_shift($expectedWrites), $string)
+        );
         $response->expects(self::once())->method('end');
 
         SymfonyHttpBridge::reflectSymfonyResponse($sfResponse, $response);
