@@ -284,7 +284,7 @@ ERROR;
     private function assertErrorInLogs(string $errorClass, string $errorMessage): void
     {
         // Decode the logs from stdout
-        $stdout = $this->getActualOutput();
+        $stdout = $this->getActualOutputForAssertion();
 
         [$requestId, $message, $json] = explode("\t", $stdout);
 
@@ -308,7 +308,7 @@ ERROR;
     private function assertPreviousErrorsInLogs(array $previousErrors)
     {
         // Decode the logs from stdout
-        $stdout = $this->getActualOutput();
+        $stdout = $this->getActualOutputForAssertion();
 
         [, , $json] = explode("\t", $stdout);
 
