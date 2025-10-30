@@ -22,8 +22,26 @@ class LambdaClientTest extends TestCase
     protected function setUp(): void
     {
         ob_start();
-        sleep(5);
-        Server::start();
+
+        $maxRetries = 5;
+        $attempt = 0;
+        while ($attempt < $maxRetries) {
+            try {
+                Server::start();
+                break;
+            } catch (\RuntimeException $runtimeException) {
+                if ('Unable to contact node.js server' !== $runtimeException->getMessage()) {
+                    throw $runtimeException;
+                }
+
+                ++$attempt;
+                if ($attempt >= $maxRetries) {
+                    throw $runtimeException;
+                }
+                \usleep(500000);
+            }
+        }
+
         $this->lambda = new LambdaClient('localhost:8126', 'phpunit');
     }
 
