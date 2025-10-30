@@ -77,9 +77,11 @@ class SymfonyHttpBridgeTest extends TestCase
             ['set-cookie', $fooCookie],
             ['set-cookie', $barCookie],
         ];
-        $response->expects(self::exactly(3))->method('header')->willReturnCallback(
-            fn($key, $value) => $this->assertEquals([$key, $value], array_shift($expectedHeaders))
-        );
+        $response->expects(self::exactly(3))->method('header')->willReturnCallback(function ($key, $value) use ($expectedHeaders) {
+            $this->assertEquals([$key, $value], array_shift($expectedHeaders));
+
+            return true;
+        });
         $response->expects(self::once())->method('status')->with(201);
         $response->expects(self::once())->method('end')->with('Test');
 
@@ -100,11 +102,13 @@ class SymfonyHttpBridgeTest extends TestCase
         $expectedWrites = [
             "Foo\n",
             "Bar\n",
-            ''
+            '',
         ];
-        $response->expects(self::exactly(3))->method('write')->willReturnCallback(
-            fn($string) => $this->assertSame(array_shift($expectedWrites), $string)
-        );
+        $response->expects(self::exactly(3))->method('write')->willReturnCallback(function ($string) use ($expectedWrites) {
+            $this->assertSame(array_shift($expectedWrites), $string);
+
+            return true;
+        });
         $response->expects(self::once())->method('end');
 
         SymfonyHttpBridge::reflectSymfonyResponse($sfResponse, $response);
