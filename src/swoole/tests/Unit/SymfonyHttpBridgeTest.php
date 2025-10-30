@@ -73,15 +73,20 @@ class SymfonyHttpBridgeTest extends TestCase
 
         $response = $this->createMock(Response::class);
         $expectedHeaders = [
-            1 => ['x-test', 'Swoole-Runtime'],
-            2 => ['set-cookie', $fooCookie],
-            3 => ['set-cookie', $barCookie],
+            ['x-test', 'Swoole-Runtime'],
+            ['set-cookie', $fooCookie],
+            ['set-cookie', $barCookie],
         ];
-        $response->expects(self::exactly(3))->method('header')->willReturnCallback(function ($key, $value) use ($expectedHeaders) {
-            $this->assertEquals([$key, $value], array_shift($expectedHeaders));
+        $callCount = 0;
+        $response->expects(self::exactly(3))->method('header')
+            ->willReturnCallback(function ($key, $value) use ($expectedHeaders, &$callCount) {
+                $this->assertArrayHasKey($callCount, $expectedHeaders);
+                $this->assertEquals($expectedHeaders[$callCount][0], $key);
+                $this->assertEquals($expectedHeaders[$callCount][1], $value);
+                ++$callCount;
 
-            return true;
-        });
+                return true;
+            });
         $response->expects(self::once())->method('status')->with(201);
         $response->expects(self::once())->method('end')->with('Test');
 
@@ -100,15 +105,18 @@ class SymfonyHttpBridgeTest extends TestCase
 
         $response = $this->createMock(Response::class);
         $expectedWrites = [
-            1 => "Foo\n",
-            2 => "Bar\n",
-            3 => '',
+            "Foo\n",
+            "Bar\n",
+            '',
         ];
-        $response->expects(self::exactly(3))->method('write')->willReturnCallback(function ($string) use ($expectedWrites) {
-            $this->assertSame(array_shift($expectedWrites), $string);
+        $callCount = 0;
+        $response->expects(self::exactly(3))->method('write')
+            ->willReturnCallback(function ($string) use ($expectedWrites, &$callCount) {
+                $this->assertEquals($expectedWrites[$callCount], $string);
+                ++$callCount;
 
-            return true;
-        });
+                return true;
+            });
         $response->expects(self::once())->method('end');
 
         SymfonyHttpBridge::reflectSymfonyResponse($sfResponse, $response);
