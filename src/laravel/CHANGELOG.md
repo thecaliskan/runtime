@@ -1,9 +1,10 @@
 # Change Log
 
-## [NOT RELEASED]
+## 0.2.0
 
 ### Added
 
+- Add support for Symfony 8 (https://github.com/php-runtime/runtime/pull/185)
 - Add support for Symfony 7
 
 ### 0.1.1
